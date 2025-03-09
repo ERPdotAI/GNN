@@ -8,6 +8,7 @@ Graph Attention Network (GAT) model for process mining
 import torch
 import torch.nn as nn
 from torch_geometric.nn import GATConv, global_mean_pool
+import numpy as np
 
 class NextTaskGAT(nn.Module):
     """
@@ -111,5 +112,7 @@ def evaluate_gat_model(model, val_loader, device):
     return (
         torch.tensor(y_true_all),
         torch.tensor(y_pred_all),
-        torch.tensor(y_prob_all)
+        torch.tensor(np.array(y_prob_all))
+        # ^Convert list of NumPy arrays to a single array for efficient tensor creation
+        # Fixes warning: "Creating a tensor from a list of numpy.ndarrays is extremely slow"
     ) 
