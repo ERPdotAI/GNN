@@ -1,0 +1,14 @@
+{
+  "memory_id": "45454eef-8786-43e0-a16e-01df012518c4",
+  "content": {
+    "test": "file_storage",
+    "timestamp": "2025-03-05T02:38:46.178529"
+  },
+  "memory_type": "process",
+  "metadata": {
+    "source": "test_script"
+  },
+  "importance": 0.5,
+  "timestamp": "2025-03-05T02:38:46.178541",
+  "embedding": null
+}

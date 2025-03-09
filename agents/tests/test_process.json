@@ -1,0 +1,181 @@
+{
+  "process_id": "test-process-123",
+  "name": "Sample Order Fulfillment Process",
+  "description": "A sample business process for order fulfillment",
+  "domain": "logistics",
+  "version": "1.0",
+  "created_at": "2023-09-15T10:30:00Z",
+  "updated_at": "2023-09-15T10:30:00Z",
+  "author": "Test User",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "start",
+      "name": "Start Process",
+      "description": "Order Received",
+      "properties": {
+        "position": {"x": 100, "y": 150}
+      }
+    },
+    {
+      "id": "verify_order",
+      "type": "task",
+      "name": "Verify Order",
+      "description": "Check order details and payment",
+      "properties": {
+        "duration": 5,
+        "position": {"x": 250, "y": 150},
+        "system": "OrderSystem"
+      }
+    },
+    {
+      "id": "check_inventory",
+      "type": "task",
+      "name": "Check Inventory",
+      "description": "Check if items are in stock",
+      "properties": {
+        "duration": 5,
+        "position": {"x": 400, "y": 150},
+        "system": "InventorySystem"
+      }
+    },
+    {
+      "id": "decision_1",
+      "type": "gateway",
+      "name": "Items Available?",
+      "description": "Check if all items are available",
+      "properties": {
+        "gateway_type": "exclusive",
+        "position": {"x": 550, "y": 150}
+      }
+    },
+    {
+      "id": "notify_backorder",
+      "type": "task",
+      "name": "Create Backorder",
+      "description": "Create backorder for out-of-stock items",
+      "properties": {
+        "duration": 10,
+        "position": {"x": 550, "y": 300},
+        "system": "InventorySystem"
+      }
+    },
+    {
+      "id": "process_payment",
+      "type": "task",
+      "name": "Process Payment",
+      "description": "Process customer payment",
+      "properties": {
+        "duration": 15,
+        "position": {"x": 700, "y": 150},
+        "system": "PaymentSystem"
+      }
+    },
+    {
+      "id": "prepare_shipment",
+      "type": "task",
+      "name": "Prepare Shipment",
+      "description": "Pick and pack items for shipment",
+      "properties": {
+        "duration": 30,
+        "position": {"x": 850, "y": 150},
+        "system": "WarehouseSystem"
+      }
+    },
+    {
+      "id": "ship_order",
+      "type": "task",
+      "name": "Ship Order",
+      "description": "Generate label and ship order",
+      "properties": {
+        "duration": 15,
+        "position": {"x": 1000, "y": 150},
+        "system": "ShippingSystem"
+      }
+    },
+    {
+      "id": "notify_customer",
+      "type": "task",
+      "name": "Notify Customer",
+      "description": "Send tracking information to customer",
+      "properties": {
+        "duration": 5,
+        "position": {"x": 1150, "y": 150},
+        "system": "CommunicationSystem"
+      }
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "name": "End Process",
+      "description": "Order Fulfilled",
+      "properties": {
+        "position": {"x": 1300, "y": 150}
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_1",
+      "source": "start",
+      "target": "verify_order",
+      "type": "sequence"
+    },
+    {
+      "id": "edge_2",
+      "source": "verify_order",
+      "target": "check_inventory",
+      "type": "sequence"
+    },
+    {
+      "id": "edge_3",
+      "source": "check_inventory",
+      "target": "decision_1",
+      "type": "sequence"
+    },
+    {
+      "id": "edge_4",
+      "source": "decision_1",
+      "target": "notify_backorder",
+      "type": "sequence",
+      "condition": "items_not_available"
+    },
+    {
+      "id": "edge_5",
+      "source": "notify_backorder",
+      "target": "process_payment",
+      "type": "sequence"
+    },
+    {
+      "id": "edge_6",
+      "source": "decision_1",
+      "target": "process_payment",
+      "type": "sequence",
+      "condition": "items_available"
+    },
+    {
+      "id": "edge_7",
+      "source": "process_payment",
+      "target": "prepare_shipment",
+      "type": "sequence"
+    },
+    {
+      "id": "edge_8",
+      "source": "prepare_shipment",
+      "target": "ship_order",
+      "type": "sequence"
+    },
+    {
+      "id": "edge_9",
+      "source": "ship_order",
+      "target": "notify_customer",
+      "type": "sequence"
+    },
+    {
+      "id": "edge_10",
+      "source": "notify_customer",
+      "target": "end",
+      "type": "sequence"
+    }
+  ]
+} 

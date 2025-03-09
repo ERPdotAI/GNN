@@ -6,7 +6,7 @@ An advanced implementation combining Graph Neural Networks, Deep Learning, and P
 
 This research project implements a novel approach to process mining using Graph Neural Networks (GNN) and deep learning techniques. The framework combines state-of-the-art machine learning models with traditional process mining methods to provide comprehensive process analysis and prediction capabilities.
 
-> **New in AdvancedGNN Branch:** This branch includes significant enhancements including activity groups for semantic modeling, improved neural architectures, and enhanced training procedures.
+> **New in AdvancedGNN Branch:** This branch includes significant enhancements including activity groups for semantic modeling, improved neural architectures, enhanced training procedures, and an integrated agent framework for process automation.
 
 ## 2. Authors
 
@@ -43,6 +43,13 @@ This research project implements a novel approach to process mining using Graph 
 - Custom process metrics
 - **New:** Enhanced experiment documentation
 
+4. **Agent Framework** (New in AdvancedGNN)
+- Autonomous process agents that act on insights
+- Memory system for persistent knowledge
+- API-based interaction with process models
+- Enterprise system integration capabilities
+- Vector database for semantic search
+
 ## 4. Technical Architecture
 
 ```
@@ -58,6 +65,13 @@ src/
 ├── visualization/
 │   └── process_viz.py        # Visualization toolkit
 ├── activity_groups.py        # Activity group definitions
+├── agents/                   # Autonomous agent framework (New)
+│   ├── src/
+│   │   ├── agents/           # Agent implementation
+│   │   ├── memory/           # Agent memory system
+│   │   ├── process_engine/   # Process model integration
+│   │   ├── api/              # API endpoints
+│   │   └── vector_db/        # Vector database implementation
 └── main.py                   # Main execution script
 ```
 
@@ -88,6 +102,12 @@ git checkout AdvancedGNN
 pip install -r requirements.txt
 ```
 
+4. For the agent framework (optional):
+```bash
+cd agents
+pip install -r requirements.txt
+```
+
 ## 7. Data Requirements
 
 The system expects process event logs in CSV format with the following structure:
@@ -111,6 +131,12 @@ python main.py --data_path <input-file-path>
 python main.py --data_path <input-file-path> --sample_size 2000 --batch_size 32 \
                --num_epochs 100 --learning_rate 0.001 --hidden_dim 64 \
                --num_layers 2 --heads 4 --dropout 0.5 --use_norm_features
+```
+
+### Agent Framework Usage (New)
+```bash
+cd agents
+python src/main.py
 ```
 
 Results are stored in timestamped directories under `results/` with the following structure:
@@ -160,6 +186,13 @@ results/run_timestamp/
 - State-action space modeling
 - Policy gradient methods
 - Resource allocation optimization
+
+### Agent Framework (New in AdvancedGNN)
+- **Autonomous Agents**: Intelligent agents that can monitor and act on process insights
+- **Memory System**: Persistent storage for agent knowledge and experiences
+- **Process Integration**: Direct integration with GNN process mining models
+- **API Endpoints**: RESTful interfaces for interacting with agents and processes
+- **Vector Database**: Semantic search capabilities for process knowledge
 
 ## 10. Activity Groups (New in AdvancedGNN)
 
