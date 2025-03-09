@@ -162,4 +162,127 @@ def create_sankey_diagram(df, le_task, save_path="process_flow_sankey.html"):
     )])
     
     sankey_fig.update_layout(title_text="Process Flow Sankey Diagram", font_size=10)
-    sankey_fig.write_html(save_path) 
+    sankey_fig.write_html(save_path)
+
+def plot_comparative_metrics(metrics_a1_a2=None, metrics_b1_b2=None, save_path="comparative_metrics.png"):
+    """Plot comparative metrics for A1 vs A2 and B1 vs B2"""
+    import matplotlib.pyplot as plt
+    
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+    
+    # A1 vs A2 comparison
+    if metrics_a1_a2:
+        metrics = ['Accuracy', 'MCC', 'Val Loss']
+        minmax_vals = [metrics_a1_a2['minmax']['accuracy'], 
+                      metrics_a1_a2['minmax']['mcc'],
+                      metrics_a1_a2['minmax']['val_loss']]
+        l2_vals = [metrics_a1_a2['l2']['accuracy'], 
+                  metrics_a1_a2['l2']['mcc'],
+                  metrics_a1_a2['l2']['val_loss']]
+        
+        x = range(len(metrics))
+        width = 0.35
+        
+        ax1.bar([i - width/2 for i in x], minmax_vals, width, label='MinMax', color='skyblue')
+        ax1.bar([i + width/2 for i in x], l2_vals, width, label='L2', color='lightgreen')
+        ax1.set_ylabel('Score')
+        ax1.set_title('A1 vs A2: MinMax vs L2 Normalization')
+        ax1.set_xticks(x)
+        ax1.set_xticklabels(metrics)
+        ax1.legend()
+        
+    # B1 vs B2 comparison
+    if metrics_b1_b2:
+        metrics = ['Accuracy', 'MCC', 'Val Loss']
+        base_vals = [metrics_b1_b2['base']['accuracy'], 
+                    metrics_b1_b2['base']['mcc'],
+                    metrics_b1_b2['base']['val_loss']]
+        enhanced_vals = [metrics_b1_b2['enhanced']['accuracy'], 
+                        metrics_b1_b2['enhanced']['mcc'],
+                        metrics_b1_b2['enhanced']['val_loss']]
+        
+        x = range(len(metrics))
+        width = 0.35
+        
+        ax2.bar([i - width/2 for i in x], base_vals, width, label='Base GNN', color='skyblue')
+        ax2.bar([i + width/2 for i in x], enhanced_vals, width, label='Enhanced GNN', color='lightgreen')
+        ax2.set_ylabel('Score')
+        ax2.set_title('B1 vs B2: Base vs Enhanced GNN')
+        ax2.set_xticks(x)
+        ax2.set_xticklabels(metrics)
+        ax2.legend()
+    
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.close()
+
+def plot_cluster_analysis(cluster_stats, save_path="cluster_analysis.png"):
+    """Plot cluster analysis results"""
+    import matplotlib.pyplot as plt
+    
+    num_clusters = len(cluster_stats)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+    
+    # Plot cluster sizes
+    sizes = [stats['size'] for stats in cluster_stats.values()]
+    ax1.bar(range(num_clusters), sizes)
+    ax1.set_title('Cluster Sizes')
+    ax1.set_xlabel('Cluster ID')
+    ax1.set_ylabel('Number of Tasks')
+    
+    # Plot average wait times
+    wait_times = [stats['avg_wait_hours'] for stats in cluster_stats.values()]
+    ax2.bar(range(num_clusters), wait_times)
+    ax2.set_title('Average Wait Times per Cluster')
+    ax2.set_xlabel('Cluster ID')
+    ax2.set_ylabel('Hours')
+    
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.close()
+
+def plot_performance_comparison(base_metrics, enhanced_metrics, save_path="performance_comparison.png"):
+    """Plot performance comparison between base and enhanced models"""
+    import matplotlib.pyplot as plt
+    
+    metrics = ['Accuracy', 'MCC']
+    base_vals = [base_metrics['accuracy'], base_metrics['mcc']]
+    enhanced_vals = [enhanced_metrics['accuracy'], enhanced_metrics['mcc']]
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    x = range(len(metrics))
+    width = 0.35
+    
+    ax.bar([i - width/2 for i in x], base_vals, width, label='Base Model', color='skyblue')
+    ax.bar([i + width/2 for i in x], enhanced_vals, width, label='Enhanced Model', color='lightgreen')
+    
+    ax.set_ylabel('Score')
+    ax.set_title('Performance Comparison: Base vs Enhanced Model')
+    ax.set_xticks(x)
+    ax.set_xticklabels(metrics)
+    ax.legend()
+    
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.close()
+
+def plot_epoch_metrics(train_metrics, val_metrics, save_path="epoch_metrics.png"):
+    """Plot epoch-wise training and validation metrics"""
+    import matplotlib.pyplot as plt
+    
+    plt.figure(figsize=(10, 6))
+    
+    epochs = range(1, len(train_metrics['loss']) + 1)
+    
+    # Plot loss
+    plt.plot(epochs, train_metrics['loss'], 'b-', label='Training Loss')
+    plt.plot(epochs, val_metrics['loss'], 'r-', label='Validation Loss')
+    plt.title('Loss per Epoch')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.grid(True)
+    
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.close() 

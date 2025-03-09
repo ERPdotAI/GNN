@@ -2,114 +2,170 @@
 # -*- coding: utf-8 -*-
 
 """
-Graph Attention Network (GAT) model for process mining
+Graph Attention Network (GAT) model for process mining with activity groups
 """
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch_geometric.nn import GATConv, global_mean_pool
+import numpy as np
 
 class NextTaskGAT(nn.Module):
     """
-    Graph Attention Network for next task prediction
+    Graph Attention Network for next task prediction with activity groups
     """
-    def __init__(self, input_dim, hidden_dim, output_dim, num_layers=2, heads=4, dropout=0.5):
+    def __init__(self, input_dim, hidden_dim, output_dim, num_groups, num_layers=2, heads=4, dropout=0.5):
         super().__init__()
+        
+        # Activity group embedding
+        self.group_embedding = nn.Embedding(num_groups, hidden_dim)
+        
+        # Input projection with group attention
+        self.input_proj = nn.Sequential(
+            nn.Linear(input_dim + hidden_dim, hidden_dim),
+            nn.LayerNorm(hidden_dim),
+            nn.GELU()
+        )
+        
+        # GAT layers with residual connections
         self.convs = nn.ModuleList()
-        self.convs.append(GATConv(input_dim, hidden_dim, heads=heads, concat=True))
-        for _ in range(num_layers-1):
-            self.convs.append(GATConv(hidden_dim*heads, hidden_dim, heads=heads, concat=True))
-        self.fc = nn.Linear(hidden_dim*heads, output_dim)
-        self.dropout = dropout
+        self.norms = nn.ModuleList()
+        
+        # First GAT layer
+        self.convs.append(GATConv(hidden_dim, hidden_dim, heads=heads, concat=True))
+        self.norms.append(nn.LayerNorm(hidden_dim * heads))
+        
+        # Additional GAT layers
+        for _ in range(num_layers - 1):
+            self.convs.append(GATConv(hidden_dim * heads, hidden_dim, heads=heads, concat=True))
+            self.norms.append(nn.LayerNorm(hidden_dim * heads))
+        
+        # Output layers
+        self.dropout = nn.Dropout(dropout)
+        self.fc1 = nn.Linear(hidden_dim * heads, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, output_dim)
+        
+        self.best_val_loss = float('inf')
 
-    def forward(self, x, edge_index, batch):
-        for conv in self.convs:
+    def forward(self, x, edge_index, batch, group_ids=None):
+        # Get group embeddings if provided
+        if group_ids is not None:
+            group_emb = self.group_embedding(group_ids)
+            x = torch.cat([x, group_emb], dim=-1)
+        
+        # Input projection
+        x = self.input_proj(x)
+        
+        # GAT layers with residual connections and layer normalization
+        for conv, norm in zip(self.convs, self.norms):
+            identity = x
             x = conv(x, edge_index)
-            x = torch.nn.functional.elu(x)
-            x = torch.nn.functional.dropout(x, p=self.dropout, training=self.training)
+            x = norm(x)
+            x = F.gelu(x)
+            x = self.dropout(x)
+            if x.size(-1) == identity.size(-1):  # Only add residual if dimensions match
+                x = x + identity
+        
+        # Global pooling
         x = global_mean_pool(x, batch)
-        return self.fc(x)
+        
+        # Output projection
+        x = self.fc1(x)
+        x = F.gelu(x)
+        x = self.dropout(x)
+        x = self.fc2(x)
+        
+        return F.log_softmax(x, dim=1)
 
-def train_gat_model(model, train_loader, val_loader, criterion, optimizer, 
-                   device, num_epochs=20, model_path="best_gnn_model.pth"):
+def train_gat_model(model, train_loader, val_loader, criterion, optimizer, device, num_epochs=100, model_path=None):
     """
-    Train the GAT model
+    Train the GAT model with activity groups
     """
     best_val_loss = float('inf')
+    patience = 10
+    patience_counter = 0
     
-    for epoch in range(1, num_epochs+1):
+    for epoch in range(num_epochs):
+        # Training
         model.train()
-        total_loss = 0.0
-        for batch_data in train_loader:
-            out = model(batch_data.x.to(device),
-                       batch_data.edge_index.to(device),
-                       batch_data.batch.to(device))
-            graph_labels = compute_graph_label(batch_data.y, batch_data.batch).to(device, dtype=torch.long)
-            loss = criterion(out, graph_labels)
-
+        total_loss = 0
+        for batch in train_loader:
+            batch = batch.to(device)
             optimizer.zero_grad()
+            
+            # Forward pass with group IDs if available
+            if hasattr(batch, 'group_ids'):
+                out = model(batch.x, batch.edge_index, batch.batch, batch.group_ids)
+            else:
+                out = model(batch.x, batch.edge_index, batch.batch)
+            
+            loss = criterion(out, batch.y)
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
             total_loss += loss.item()
+        
         avg_train_loss = total_loss / len(train_loader)
-
+        
         # Validation
         model.eval()
-        val_loss = 0.0
+        val_loss = 0
         with torch.no_grad():
-            for batch_data in val_loader:
-                out = model(batch_data.x.to(device),
-                          batch_data.edge_index.to(device),
-                          batch_data.batch.to(device))
-                glabels = compute_graph_label(batch_data.y, batch_data.batch).to(device, dtype=torch.long)
-                val_loss += criterion(out, glabels).item()
-        avg_val_loss = val_loss/len(val_loader)
+            for batch in val_loader:
+                batch = batch.to(device)
+                if hasattr(batch, 'group_ids'):
+                    out = model(batch.x, batch.edge_index, batch.batch, batch.group_ids)
+                else:
+                    out = model(batch.x, batch.edge_index, batch.batch)
+                val_loss += criterion(out, batch.y).item()
         
-        print(f"[Epoch {epoch}/{num_epochs}] train_loss={avg_train_loss:.4f}, val_loss={avg_val_loss:.4f}")
+        avg_val_loss = val_loss / len(val_loader)
         
+        # Early stopping
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss
-            torch.save(model.state_dict(), model_path)
-            print(f"  Saved best model (val_loss={best_val_loss:.4f})")
+            model.best_val_loss = best_val_loss
+            patience_counter = 0
+            if model_path:
+                torch.save(model.state_dict(), model_path)
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                print(f"Early stopping at epoch {epoch}")
+                break
+        
+        if epoch % 10 == 0:
+            print(f"Epoch {epoch:03d}: Train Loss = {avg_train_loss:.4f}, Val Loss = {avg_val_loss:.4f}")
+    
+    # Load best model if saved
+    if model_path:
+        model.load_state_dict(torch.load(model_path))
     
     return model
 
-def compute_graph_label(y, batch):
+def evaluate_gat_model(model, loader, device):
     """
-    Compute graph-level labels (MPS-compatible)
-    """
-    unique_batches = batch.unique()
-    labels_out = []
-    for bidx in unique_batches:
-        mask = (batch==bidx)
-        yvals_cpu = y[mask].detach().cpu()
-        vals, counts = torch.unique(yvals_cpu, return_counts=True)
-        lbl = vals[torch.argmax(counts)]
-        labels_out.append(lbl)
-    return torch.stack(labels_out)
-
-def evaluate_gat_model(model, val_loader, device):
-    """
-    Evaluate GAT model and return predictions and probabilities
+    Evaluate the GAT model
     """
     model.eval()
-    y_true_all, y_pred_all, y_prob_all = [], [], []
+    y_true = []
+    y_pred = []
+    y_prob = []
     
     with torch.no_grad():
-        for batch_data in val_loader:
-            logits = model(batch_data.x.to(device),
-                         batch_data.edge_index.to(device),
-                         batch_data.batch.to(device))
-            probs = torch.softmax(logits, dim=1).cpu().numpy()
-            glabels = compute_graph_label(batch_data.y, batch_data.batch)
+        for batch in loader:
+            batch = batch.to(device)
+            if hasattr(batch, 'group_ids'):
+                out = model(batch.x, batch.edge_index, batch.batch, batch.group_ids)
+            else:
+                out = model(batch.x, batch.edge_index, batch.batch)
             
-            for i in range(logits.size(0)):
-                y_pred_all.append(int(torch.argmax(logits[i]).cpu()))
-                y_prob_all.append(probs[i])
-                y_true_all.append(int(glabels[i]))
+            prob = torch.exp(out)
+            pred = prob.argmax(dim=1)
+            
+            y_true.extend(batch.y.cpu().numpy())
+            y_pred.extend(pred.cpu().numpy())
+            y_prob.extend(prob.cpu().numpy())
     
-    return (
-        torch.tensor(y_true_all),
-        torch.tensor(y_pred_all),
-        torch.tensor(y_prob_all)
-    ) 
+    return np.array(y_true), np.array(y_pred), np.array(y_prob) 

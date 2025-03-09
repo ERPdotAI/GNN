@@ -142,3 +142,49 @@ def build_task_adjacency(df, num_tasks):
             tgt = tasks_seq[i+1]
             A[src, tgt] += 1.0
     return A 
+
+def analyze_cluster_statistics(df, cluster_labels, le_task):
+    """
+    Analyze statistics for each cluster
+    """
+    # Add cluster labels to dataframe
+    df = df.copy()
+    df["cluster"] = df["task_id"].apply(lambda x: cluster_labels[x])
+    
+    # Cluster sizes and tasks
+    cluster_stats = {}
+    for cluster_id in sorted(set(cluster_labels)):
+        task_ids = [i for i, lbl in enumerate(cluster_labels) if lbl == cluster_id]
+        task_names = [le_task.inverse_transform([tid])[0] for tid in task_ids]
+        
+        # Get events and cases in this cluster
+        cluster_events = df[df["cluster"] == cluster_id]
+        cluster_cases = cluster_events["case_id"].nunique()
+        
+        # Calculate waiting times
+        cluster_events["next_timestamp"] = cluster_events.groupby("case_id")["timestamp"].shift(-1)
+        cluster_events["wait_hours"] = (cluster_events["next_timestamp"] - cluster_events["timestamp"]).dt.total_seconds() / 3600
+        avg_wait = cluster_events["wait_hours"].mean()
+        
+        cluster_stats[cluster_id] = {
+            "size": len(task_ids),
+            "tasks": task_names,
+            "num_events": len(cluster_events),
+            "num_cases": cluster_cases,
+            "avg_wait_hours": avg_wait if not pd.isna(avg_wait) else 0.0
+        }
+    
+    return cluster_stats
+
+def print_cluster_analysis(cluster_stats):
+    """Print detailed cluster analysis"""
+    print("\n=== Cluster Analysis ===")
+    for cluster_id, stats in cluster_stats.items():
+        print(f"\nCluster {cluster_id}:")
+        print(f"  Size: {stats['size']} tasks")
+        print(f"  Events: {stats['num_events']}")
+        print(f"  Cases: {stats['num_cases']}")
+        print(f"  Avg Wait Time: {stats['avg_wait_hours']:.2f} hours")
+        print("  Tasks:")
+        for task in stats['tasks']:
+            print(f"    - {task}") 
