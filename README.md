@@ -1,63 +1,53 @@
-## Process Mining with Graph Neural Networks
+# ERP•AI Process GNN Framework
 
-An advanced implementation combining Graph Neural Networks, Deep Learning, and Process Mining techniques for business process analysis and prediction.
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Version](https://img.shields.io/badge/Version-2.0.0-green.svg)](https://github.com/ERPdotAI/GNN/tree/AdvancedGNN)
 
-## 1. Overview
+## Process Mining with Graph Neural Networks and Agent Framework
 
-This research project implements a novel approach to process mining using Graph Neural Networks (GNN) and deep learning techniques. The framework combines state-of-the-art machine learning models with traditional process mining methods to provide comprehensive process analysis and prediction capabilities.
+The AdvancedGNN branch extends our original GNN-based process mining framework with activity group semantics, enhanced neural architectures, and an integrated agent framework for process automation and optimization. This research implementation combines state-of-the-art machine learning models with traditional process mining methods.
 
-> **New in AdvancedGNN Branch:** This branch includes significant enhancements including activity groups for semantic modeling, improved neural architectures, enhanced training procedures, and an integrated agent framework for process automation and optimization.
+**Analyze, predict, and optimize business processes with advanced AI techniques.**
 
-## 2. Authors
+## 🔍 Key Features
 
-- **Somesh Misra** [@mathprobro](https://x.com/mathprobro)
-- **Shashank Dixit** [@sphinx](https://x.com/protosphinx)
-- **Research Group**: [ERP.AI](https://www.erp.ai) Research
+### 🧠 Enhanced Neural Architecture
 
-## 3. Key Components
+The AdvancedGNN branch includes significant architectural improvements:
 
-1. **Process Analysis**
-- Advanced bottleneck detection using temporal analysis
-- Conformance checking with inductive mining
-- Cycle time analysis and prediction
-- Transition pattern discovery
-- Spectral clustering for process segmentation
-- **New:** Activity groups for semantic categorization of business processes
-- **New:** Enhanced cluster analysis with statistical insights
+- **Activity Group Embeddings** for semantic understanding of process relationships
+- **Layer Normalization and Residual Connections** for improved training stability
+- **GELU Activation Functions** replacing traditional ReLU activations
+- **Early Stopping with Patience** for more efficient training
+- **Group-aware Attention Mechanisms** for better context understanding
 
-2. **Machine Learning Models**
-- Graph Attention Networks (GAT) for structural learning
-- LSTM networks for temporal dependencies
-- Reinforcement Learning for process optimization
-- Custom neural architectures for process prediction
-- **New:** Group-aware attention mechanisms
-- **New:** Layer normalization and residual connections
-- **New:** GELU activation functions
-- **New:** Improved gradient flow with better training stability
+### 📊 Process Mining Components
 
-3. **Visualization Suite**
-- Interactive process flow visualization
-- Temporal pattern analysis
-- Performance bottleneck identification
-- Resource utilization patterns
-- Custom process metrics
-- **New:** Enhanced experiment documentation
+Core process mining capabilities implemented in the code:
 
-4. **Agent Framework** (New in AdvancedGNN)
-- Autonomous process agents that act on GNN-derived insights
-- Long-term and short-term memory system for persistent knowledge
-- API-based interaction with process models for integration
-- Enterprise system connectivity for real-world automation
-- Vector database for semantic search and knowledge retrieval
-- Process monitoring and automated intervention capabilities
+- **Bottleneck Detection** using temporal analysis between activities
+- **Conformance Checking** with inductive miner implementation
+- **Cycle Time Analysis** for process duration insights
+- **Transition Pattern Discovery** for process flow understanding
+- **Spectral Clustering** for process segmentation
 
-## 4. Technical Architecture
+### 🤖 Agent Framework Integration
+
+The integrated agent framework provides:
+
+- **Process Agents** that can monitor and act on GNN insights
+- **Memory System** with persistent storage for agent knowledge
+- **Process Engine Integration** with GNN model connections
+- **Vector Database** for semantic search capabilities
+- **API Endpoints** for agent and process interactions
+
+## 📁 Technical Architecture
 
 ```
 src/
 ├── input/                # input files
 ├── models/
-│   ├── gat_model.py      # Graph Attention Network implementation
+│   ├── gat_model.py      # Enhanced Graph Attention Network 
 │   └── lstm_model.py     # LSTM sequence model
 ├── modules/
 │   ├── data_preprocessing.py  # Data handling and feature engineering
@@ -66,7 +56,7 @@ src/
 ├── visualization/
 │   └── process_viz.py        # Visualization toolkit
 ├── activity_groups.py        # Activity group definitions
-├── agents/                   # Autonomous agent framework (New)
+├── agents/                   # Autonomous agent framework
 │   ├── src/
 │   │   ├── agents/           # Agent implementation
 │   │   ├── memory/           # Agent memory system
@@ -78,7 +68,9 @@ src/
 └── main.py                   # Main execution script
 ```
 
-## 5. Technical Requirements
+## 🚀 Getting Started
+
+### Prerequisites
 
 - Python 3.8+
 - PyTorch 1.9+
@@ -87,109 +79,78 @@ src/
 - NetworkX
 - Additional dependencies in requirements.txt
 
-For the agent framework, additional requirements include:
-- FastAPI
-- FAISS vector database
-- Langchain
-- Pydantic
+### Installation
 
-## 6. Installation
-
-1. Clone the repository:
 ```bash
+# Clone the repository
 git clone https://github.com/ERPdotAI/GNN.git
 cd GNN
-```
 
-2. Switch to the AdvancedGNN branch (for enhanced features):
-```bash
+# Switch to AdvancedGNN branch
 git checkout AdvancedGNN
-```
 
-3. Install dependencies for GNN process mining:
-```bash
+# Install dependencies for GNN process mining
 pip install -r requirements.txt
-```
 
-4. For the agent framework (optional):
-```bash
+# For the agent framework (optional)
 cd agents
 pip install -r requirements.txt
 ```
 
-## 7. Data Requirements
+### Running Process Mining
 
-The system expects process event logs in CSV format with the following structure:
-- case_id: Process instance identifier
-- task_name: Activity name
-- timestamp: Activity timestamp
-- resource: Resource identifier
-- amount: Numerical attribute (if applicable)
-
-The AdvancedGNN branch supports multiple benchmark datasets including BPI 2012, BPI 2019, and BPI 2020.
-
-## 8. Usage
-
-### Basic Usage
 ```bash
+# Basic usage
 python main.py --data_path <input-file-path>
-```
 
-### Advanced Usage (AdvancedGNN branch)
-```bash
+# Advanced usage with all options
 python main.py --data_path <input-file-path> --sample_size 2000 --batch_size 32 \
                --num_epochs 100 --learning_rate 0.001 --hidden_dim 64 \
                --num_layers 2 --heads 4 --dropout 0.5 --use_norm_features
 ```
 
-### Agent Framework Usage (New)
+### Using the Agent Framework
+
 ```bash
 cd agents
 python src/main.py
 ```
 
-The agent framework provides a REST API that can be accessed at `http://localhost:8000` when running.
+## 📋 Implementation Details
 
-Results are stored in timestamped directories under `results/` with the following structure:
-```
-results/run_timestamp/
-├── models/          # Trained model weights
-├── visualizations/  # Generated visualizations
-├── metrics/         # Performance metrics (JSON format)
-├── analysis/        # Detailed analysis results
-└── experiment_summary.txt  # Comprehensive experiment documentation
-```
+The code in this branch implements the following:
 
-## 9. GNN-Agent Integration (New in AdvancedGNN)
+### GNN Implementation
+- **Graph Attention Networks** with multi-head attention mechanisms
+- **Activity Group Embeddings** integrated into the GAT architecture
+- **Improved Sequence Modeling** with enhanced LSTM implementation
+- **Advanced Preprocessing** with semantic feature engineering
 
-The AdvancedGNN branch introduces a unique integration between GNN-based process mining and autonomous agents. This integration enables:
+### Process Mining Components
+- **Bottleneck Analysis** that identifies process inefficiencies
+- **Cycle Time Analysis** for understanding process durations
+- **Conformance Checking** against reference process models
+- **Transition Analysis** for understanding process flows
+- **Spectral Clustering** for process segmentation
 
-1. **Process Insights to Actions**: Agents can leverage the GNN models to understand process patterns and take appropriate actions
-2. **Automated Optimization**: Based on GNN predictions, agents can optimize resource allocation and process flow
-3. **Continuous Learning**: Agents store observations and outcomes in their memory system, continuously improving their actions
-4. **Enterprise Integration**: The agent framework provides API endpoints to connect GNN insights with enterprise systems
+### Agent Framework
+- **Agent Framework Core** for implementing autonomous process agents
+- **Memory System** for persistent agent knowledge
+- **Process Engine Integration** with GNN models
+- **Vector Database** for semantic search of process knowledge
+- **API Layer** for interaction with agents and processes
 
-### Integration Flow
+## 🔄 GNN-Agent Integration
 
-```
-[Process Event Logs] → [GNN Process Mining] → [Process Insights] → [Agent Framework] → [Automated Actions]
-                                                                        ↓
-                       [Improved Process] ← [Process Optimization] ← [Memory System]
-```
-
-For detailed integration documentation, see `agents/GNN_INTEGRATION.md`.
-
-### Example Integration Code
+The AdvancedGNN branch introduces a unique integration between GNN-based process mining and autonomous agents:
 
 ```python
-# Import from GNN models
+# Example integration flow
 from models.gat_model import NextTaskGAT
-
-# Import from agent framework
 from agents.src.process_engine.gnn_model import ProcessGNNModel
 from agents.src.agents.agent_framework import ProcessAgent
 
-# Create integrated process agent
+# Load trained GNN model
 gnn_model = NextTaskGAT(...)
 gnn_model.load_state_dict(torch.load("models/best_gnn_model.pth"))
 
@@ -198,131 +159,35 @@ process_model = ProcessGNNModel(gnn_model)
 
 # Initialize agent with process model
 agent = ProcessAgent(
-    name="inventory_optimization_agent",
+    name="process_optimization_agent",
     process_model=process_model,
-    objective="Optimize inventory levels and reorder timing"
+    objective="Optimize process efficiency"
 )
 
 # Deploy agent to monitor and optimize processes
 agent.deploy()
 ```
 
-## 10. Technical Details
+See `agents/GNN_INTEGRATION.md` for detailed integration documentation.
 
-### Graph Neural Network Architecture
-- Multi-head attention mechanisms
-- Dynamic graph construction
-- Adaptive feature learning
-- Custom loss functions for process-specific metrics
-- **New in AdvancedGNN:**
-  - Activity group embeddings
-  - Layer normalization for training stability
-  - Residual connections for better gradient flow
-  - GELU activation functions
-  - Early stopping with patience
+## 📊 Implemented Use Cases
 
-### LSTM Implementation
-- Bidirectional sequence modeling
-- Variable-length sequence handling
-- Custom embedding layer for process activities
-- **New in AdvancedGNN:**
-  - Improved sequence padding and handling
-  - Enhanced evaluation procedures
+The framework currently supports analysis and optimization for:
 
-### Process Mining Components
-- Inductive miner implementation
-- Token-based replay
-- Custom conformance checking metrics
-- Advanced bottleneck detection algorithms
-- **New in AdvancedGNN:**
-  - Semantic activity grouping
-  - More detailed cluster analysis
-  - Comprehensive bottleneck detection
+- **Process Bottleneck Identification**
+- **Next Activity Prediction**
+- **Process Conformance Analysis**
+- **Activity Clustering**
+- **Process Flow Visualization**
 
-### Reinforcement Learning
-- Custom environment for process optimization
-- State-action space modeling
-- Policy gradient methods
-- Resource allocation optimization
+## 📚 Documentation
 
-### Agent Framework (New in AdvancedGNN)
-- **Autonomous Agents**: Intelligent agents that can monitor and act on process insights
-- **Memory System**: Persistent storage for agent knowledge and experiences
-  - Short-term memory for immediate context
-  - Long-term memory for learned patterns and outcomes
-  - Semantic retrieval for context-aware decisions
-- **Process Integration**: Direct integration with GNN process mining models
-  - Process model wrapper for agent-compatible interface
-  - Event stream monitoring for real-time processing
-  - Anomaly detection and intervention capabilities
-- **API Endpoints**: RESTful interfaces for interacting with agents and processes
-  - Agent management and configuration
-  - Process monitoring and control
-  - Integration with enterprise systems
-- **Vector Database**: Semantic search capabilities for process knowledge
-  - FAISS-based vector indexing for efficient retrieval
-  - Similarity search for related process patterns
-  - Knowledge embedding for semantic understanding
+The architecture is documented in the following files:
+- `README.md` - Overview and getting started
+- `ARCHITECTURE.md` - Detailed architecture diagrams
+- `agents/GNN_INTEGRATION.md` - Agent integration documentation
 
-## 11. Activity Groups (New in AdvancedGNN)
-
-Activity groups provide semantic categorization of business process activities, enabling the model to better understand the functional relationships between tasks. The groups are defined in `activity_groups.py` and include categories such as:
-
-- Order creation activities
-- Change management activities
-- Approval and cancellation activities
-- Receipt recording activities
-- Vendor interactions
-- System interactions
-
-These groups are automatically integrated into the model architecture via group embeddings and group-aware attention mechanisms.
-
-## 12. Command Line Arguments (New in AdvancedGNN)
-
-The enhanced version provides flexible experimentation through command line arguments:
-
-```bash
-python main.py --help
-```
-
-Key arguments include:
-- `--data_path`: Path to input event log
-- `--sample_size`: Number of cases to sample
-- `--batch_size`: Batch size for training
-- `--num_epochs`: Number of training epochs
-- `--learning_rate`: Learning rate
-- `--hidden_dim`: Hidden dimension size
-- `--num_layers`: Number of GNN layers
-- `--heads`: Number of attention heads
-- `--dropout`: Dropout rate
-- `--use_norm_features`: Use L2 normalized features
-- `--additional_features`: Additional numerical features to include
-
-## 13. Use Cases (New)
-
-The combined GNN and Agent Framework enables powerful use cases across various industries:
-
-### Manufacturing Process Optimization
-- Predict bottlenecks in production lines
-- Automatically adjust resource allocation
-- Optimize maintenance scheduling based on process patterns
-
-### Financial Services Compliance
-- Detect anomalous process patterns in financial transactions
-- Automate compliance checks and reporting
-- Reduce manual review of standard processes
-
-### Healthcare Patient Flow
-- Model and optimize patient journeys
-- Predict resource needs for different treatment paths
-- Automate appointment scheduling and resource allocation
-
-### Supply Chain Management
-- Predict delivery delays based on process patterns
-- Automatically adjust ordering patterns
-- Optimize warehouse operations based on demand forecasts
-
-## 14. Contributing
+## 🤝 Contributing
 
 We welcome contributions from the research community. Please follow these steps:
 
@@ -331,16 +196,14 @@ We welcome contributions from the research community. Please follow these steps:
 3. Implement your changes
 4. Submit a pull request with detailed documentation
 
-## 15. Citation
+## 📄 License
 
-If you use this code in your research, please cite:
+This project is licensed under the Apache 2.0 License - see the LICENSE file for details.
 
-```bibtex
-@software{GNN_ProcessMining,
-  author = {Shashank Dixit/Somesh Misra},
-  title = {Process Mining with Graph Neural Networks},
-  year = {2025},
-  publisher = {ERP.AI},
-  url = {https://github.com/ERPdotAI/GNN}
-}
-``` 
+## 🔬 Research Context
+
+This is a research implementation combining process mining with graph neural networks and agent systems. The code demonstrates a sophisticated approach to business process analysis and automation.
+
+---
+
+<p align="center">© 2025 ERP•AI. All rights reserved.</p> 
